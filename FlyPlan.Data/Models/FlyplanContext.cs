@@ -17,7 +17,6 @@ namespace FlyPlan.Data.Models
 
         public virtual DbSet<ConfirmationInfo> ConfirmationInfo { get; set; }
         public virtual DbSet<Flight> Flight { get; set; }
-        public virtual DbSet<FlightDetail> FlightDetail { get; set; }
         public virtual DbSet<Order> Order { get; set; }
         public virtual DbSet<Payment> Payment { get; set; }
         public virtual DbSet<Traveller> Traveller { get; set; }
@@ -49,16 +48,9 @@ namespace FlyPlan.Data.Models
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-
-                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<FlightDetail>(entity =>
-            {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.ClassType).HasMaxLength(250);
+
+                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Depart).HasMaxLength(250);
 
@@ -85,6 +77,8 @@ namespace FlyPlan.Data.Models
                 entity.Property(e => e.ReturnTime).HasMaxLength(250);
 
                 entity.Property(e => e.TotalTime).HasMaxLength(250);
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Order>(entity =>

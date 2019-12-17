@@ -37,11 +37,11 @@ namespace FlyPlan.Api.Controllers
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetFlights));
 
-            var response = new ListResponse<FlightDetail>();
+            var response = new ListResponse<Flight>();
 
             try
             {
-                var flightDetail = DbContext.FlightDetail.Where(p =>
+                var flightDetail = DbContext.Flight.Where(p =>
                     p.ClassType.Contains(searchFlightCriteria.ClassType) ||
                     p.DepartTime == searchFlightCriteria.DepartTime
                     ).ToList();

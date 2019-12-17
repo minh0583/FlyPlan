@@ -42,9 +42,20 @@ namespace FlyPlan.Api.Controllers
             try
             {
                 var flightDetail = DbContext.Flight.Where(p =>
-                    p.ClassType.Contains(searchFlightCriteria.ClassType) ||
-                    p.DepartTime == searchFlightCriteria.DepartTime
-                    ).ToList();
+                p.Depart == searchFlightCriteria.From ||
+                p.Return == searchFlightCriteria.To ||
+                p.DepartTime == searchFlightCriteria.DepartDate.ToShortTimeString() ||
+                p.ReturnTime == searchFlightCriteria.ReturnDate.ToShortTimeString() ||
+                //searchFlightCriteria.Adults 
+                //searchFlightCriteria.Children 
+                //searchFlightCriteria.Infants
+                p.ClassType.Contains(searchFlightCriteria.ClassType) ||
+                p.RoundTrip == searchFlightCriteria.RoundTrip ||
+                p.TotalMoney >= searchFlightCriteria.PriceFrom && p.TotalMoney <= searchFlightCriteria.PriceTo ||
+                p.DepartTime == searchFlightCriteria.DepartTime ||
+                p.DepartAirlineName == searchFlightCriteria.Airlines ||
+                p.ReturnAirlineName == searchFlightCriteria.Airlines
+                ).ToList();
 
                 response.Model = flightDetail;
             }

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <UserSecretsId>d2e429a0-1c31-4925-95fc-fcfb334b55a8</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -21,6 +22,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlyPlan.Data\FlyPlan.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Flyplan.Api.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

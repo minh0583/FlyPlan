@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -43,23 +44,35 @@ namespace FlyPlan.Api.Controllers
 
             try
             {
-                var flightDetail = DbContext.Flight.Where(p =>
-                p.Depart == searchFlightCriteria.From ||
-                p.Return == searchFlightCriteria.To ||
-                p.DepartTime == searchFlightCriteria.DepartDate.ToShortTimeString() ||
-                p.ReturnTime == searchFlightCriteria.ReturnDate.ToShortTimeString() ||
-                //searchFlightCriteria.Adults 
-                //searchFlightCriteria.Children 
-                //searchFlightCriteria.Infants
-                p.ClassType.Contains(searchFlightCriteria.ClassType) ||
-                p.RoundTrip == searchFlightCriteria.RoundTrip ||
-                p.TotalMoney >= searchFlightCriteria.PriceFrom && p.TotalMoney <= searchFlightCriteria.PriceTo ||
-                p.DepartTime == searchFlightCriteria.DepartTime ||
-                p.DepartAirlineName == searchFlightCriteria.Airlines ||
-                p.ReturnAirlineName == searchFlightCriteria.Airlines
-                ).ToList();
+                if (searchFlightCriteria.GetType()
+                    .GetProperties()
+                    .Select(p => p.GetValue(searchFlightCriteria))
+                    .Any(p => p != null)
+                )
+                {
+                    var flightDetail = DbContext.Flight.Where(p =>
+                        (string.IsNullOrEmpty(searchFlightCriteria.From) || p.Depart == searchFlightCriteria.From) &&
+                        (string.IsNullOrEmpty(searchFlightCriteria.To) || p.Return == searchFlightCriteria.To) &&
+                        (searchFlightCriteria.DepartDate == null || Utils.ConvertToDateTime(p.DepartTime) >= searchFlightCriteria.DepartDate) &&
+                        (searchFlightCriteria.ReturnDate == null || Utils.ConvertToDateTime(p.ReturnTime) <= searchFlightCriteria.ReturnDate) &&
+                        //searchFlightCriteria.Adults 
+                        //searchFlightCriteria.Children 
+                        //searchFlightCriteria.Infants
+                        (string.IsNullOrEmpty(searchFlightCriteria.ClassType) || p.ClassType.Contains(searchFlightCriteria.ClassType)) &&
+                        (searchFlightCriteria.RoundTrip == null || p.RoundTrip == searchFlightCriteria.RoundTrip) &&
+                        (searchFlightCriteria.PriceFrom == null || p.TotalMoney >= searchFlightCriteria.PriceFrom) &&
+                        (searchFlightCriteria.PriceTo == null || p.TotalMoney <= searchFlightCriteria.PriceTo) &&
+                        (string.IsNullOrEmpty(searchFlightCriteria.DepartTime) || p.DepartTime == searchFlightCriteria.DepartTime) &&
+                        (string.IsNullOrEmpty(searchFlightCriteria.Airlines) || p.DepartAirlineName == searchFlightCriteria.Airlines) &&
+                        (string.IsNullOrEmpty(searchFlightCriteria.Airlines) || p.ReturnAirlineName == searchFlightCriteria.Airlines)
+                    ).ToList();
 
-                response.Model = flightDetail;
+                    response.Model = flightDetail;
+                }
+                else
+                {
+                    response.Model = DbContext.Flight.ToList();
+                }
             }
             catch (Exception ex)
             {

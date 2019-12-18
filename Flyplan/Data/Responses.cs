@@ -59,7 +59,7 @@ namespace FlyPlan.Api.Data
 
         public string ErrorMessage { get; set; }
 
-        public int TotalRecord => Model.Count();
+        public int TotalRecord => Model != null ? Model.Count() : 0;
 
         public IEnumerable<TModel> Model { get; set; }
     }
@@ -72,7 +72,7 @@ namespace FlyPlan.Api.Data
 
         public string ErrorMessage { get; set; }
 
-        public int TotalRecord => Model.Count();
+        public int TotalRecord => Model != null ? Model.Count() : 0;
 
         public IEnumerable<TModel> Model { get; set; }
 

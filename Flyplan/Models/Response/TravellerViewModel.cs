@@ -8,6 +8,7 @@ namespace FlyPlan.Api.Models.Response
     public class TravellerViewModel
     {
         public Guid Id { get; set; }
+        public Guid OrderId { get; set; }
         public string PersonType { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

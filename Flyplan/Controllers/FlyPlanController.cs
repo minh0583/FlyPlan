@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using FlyPlan.Api.Classes;
 using FlyPlan.Api.Data;
 using FlyPlan.Api.Models.Response;
 using FlyPlan.Api.Models.Criteria;
@@ -12,6 +13,7 @@ using FlyPlan.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+
 namespace FlyPlan.Api.Controllers
 {
     [Route("api")]
@@ -83,7 +85,32 @@ namespace FlyPlan.Api.Controllers
 
             try
             {
+                if (DbContext.Flight.FirstOrDefault(p => p.Id == orderRequest.FlightId) == null)
+                {
+                    response.ErrorMessage = $"Flight with {orderRequest.FlightId} is not found";
+                    return response.ToHttpResponse();
+                }
+
+                if (DbContext.Payment.FirstOrDefault(p => p.Id == orderRequest.PaymentId) == null)
+                {
+                    response.ErrorMessage = $"Payment with {orderRequest.PaymentId} is not found";
+                    return response.ToHttpResponse();
+                }
+
+                if (DbContext.ConfirmationInfo.FirstOrDefault(p => p.Id == orderRequest.ConfirmationId) == null)
+                {
+                    response.ErrorMessage = $"Confirmation with {orderRequest.ConfirmationId} is not found";
+                    return response.ToHttpResponse();
+                }
+
+                if (DbContext.Traveller.Count(p => orderRequest.TravellerIds.Contains(p.Id)) != orderRequest.TravellerIds.Count)
+                {
+                    response.ErrorMessage = "Travellers are not found";
+                    return response.ToHttpResponse();
+                }
+
                 var order = Mapper.Map<Order>(orderRequest);
+                order.Code = Utils.GenerateReservationCode(6);
                 order.Id = Guid.NewGuid();
 
                 DbContext.Order.Add(order);
@@ -115,11 +142,11 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
-        [HttpGet("order/{id}")]
+        [HttpGet("order/{code}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public IActionResult GetOrderDetail(Guid Id)
+        public IActionResult GetOrderDetail(string code)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetOrderDetail));
 
@@ -131,17 +158,20 @@ namespace FlyPlan.Api.Controllers
                     .Include(p => p.Confirmation)
                     .Include(p => p.Flight)
                     .Include(p => p.Payment)
-                    .FirstOrDefault(p => p.Id == Id);
+                    .FirstOrDefault(p => p.Code == code);
 
-                var travelOrders = DbContext.TravellerOrder
-                    .Include(p => p.Traveller)
-                    .Where(p => p.OrderId == Id)
-                    .Select(p => p.Traveller);
+                if (order != null)
+                {
+                    var travelOrders = DbContext.TravellerOrder
+                        .Include(p => p.Traveller)
+                        .Where(p => p.OrderId == order.Id)
+                        .Select(p => p.Traveller);
 
-                var orderViewModel = Mapper.Map<OrderViewModel>(order);
-                orderViewModel.Travellers = Mapper.Map<List<TravellerViewModel>>(travelOrders);
+                    var orderViewModel = Mapper.Map<OrderViewModel>(order);
+                    orderViewModel.Travellers = Mapper.Map<List<TravellerViewModel>>(travelOrders);
 
-                response.Model = orderViewModel;
+                    response.Model = orderViewModel;
+                }
             }
             catch (Exception ex)
             {

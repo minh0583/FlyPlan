@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
@@ -58,6 +59,8 @@ namespace FlyPlan.Api.Data
 
         public string ErrorMessage { get; set; }
 
+        public int TotalRecord => Model.Count();
+
         public IEnumerable<TModel> Model { get; set; }
     }
 
@@ -68,6 +71,8 @@ namespace FlyPlan.Api.Data
         public bool DidError { get; set; }
 
         public string ErrorMessage { get; set; }
+
+        public int TotalRecord => Model.Count();
 
         public IEnumerable<TModel> Model { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using AutoMapper;
+using FlyPlan.Api.Models.Request;
 using FlyPlan.Api.Models.Response;
 using FlyPlan.Data.Models;
 
@@ -9,9 +10,8 @@ namespace FlyPlan.Api.Mapper
     {
         public MapperProfile()
         {
-            CreateMap<OrderViewModel, Order>()
-                .ForMember(p => p.CreatedDate, opt => opt.MapFrom(p => p.Id == Guid.Empty ? DateTime.Now : (DateTime?)null))
-                .ForMember(p => p.UpdatedDate, opt => opt.MapFrom(p => p.Id != Guid.Empty ? DateTime.Now : (DateTime?)null));
+            CreateMap<OrderRequest, Order>()
+                .ForMember(p => p.CreatedDate, opt => opt.MapFrom(p => DateTime.Now));
 
             CreateMap<Order, OrderViewModel>()
                 .ForMember(p => p.PaymentViewModel, opt => opt.MapFrom(p => p.Payment))

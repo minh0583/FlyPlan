@@ -53,8 +53,8 @@ namespace FlyPlan.Api.Controllers
                     var flightDetail = DbContext.Flight.Where(p =>
                         (string.IsNullOrEmpty(searchFlightCriteria.From) || p.Depart == searchFlightCriteria.From) &&
                         (string.IsNullOrEmpty(searchFlightCriteria.To) || p.Return == searchFlightCriteria.To) &&
-                        (searchFlightCriteria.DepartDate == null || Utils.ConvertToDateTime(p.DepartTime) >= searchFlightCriteria.DepartDate) &&
-                        (searchFlightCriteria.ReturnDate == null || Utils.ConvertToDateTime(p.ReturnTime) <= searchFlightCriteria.ReturnDate) &&
+                        (searchFlightCriteria.DepartDate == null || p.DepartTime.ToDateTime() >= searchFlightCriteria.DepartDate.Value.ChangeTime(0,0,0,0)) &&
+                        (searchFlightCriteria.ReturnDate == null || p.ReturnTime.ToDateTime() <= searchFlightCriteria.ReturnDate.Value.ChangeTime(23,59,59,0)) &&
                         //searchFlightCriteria.Adults 
                         //searchFlightCriteria.Children 
                         //searchFlightCriteria.Infants

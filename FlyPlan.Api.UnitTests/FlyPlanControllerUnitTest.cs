@@ -16,43 +16,43 @@ namespace FlyPlan.Api.UnitTests
 {
     public class FlyPlanControllerUnitTest
     {
+        private FlyplanContext _dbContext;
+
         [Fact]
-        public void TestGetFlights()
+        public void TestGetAllFlights()
         {
-            // Arrange
-            var dbContext = FlyplanDbContextMocker.GetFlyplanContext(nameof(TestGetFlights));
-            //auto mapper configuration
-            var mockMapper = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new MapperProfile());
-            });
-            var mapper = mockMapper.CreateMapper();
-            var controller = new FlyPlanController(null, dbContext, mapper);
-
-            // Act
+            var controller = InitialFlyPlanController(nameof(TestGetAllFlights));
             var response = controller.GetFlights(new SearchFlight()) as ObjectResult;
-            var value = response.Value as ListResponse<Flight>;
+            var value = response?.Value as ListResponse<Flight>;
 
-            dbContext.Dispose();
+            _dbContext.Dispose();
 
             // Assert
-            Assert.False(value.DidError);
+            Assert.False(value?.DidError);
+        }
+
+        [Fact]
+        public void TestGetFlightsByDateRange()
+        {
+            var controller = InitialFlyPlanController(nameof(TestGetFlightsByDateRange));
+            var response = controller.GetFlights(new SearchFlight
+            {
+                DepartDate = Convert.ToDateTime("01/14/2020"),
+                ReturnDate = Convert.ToDateTime("01/15/2020")
+
+            }) as ObjectResult;
+            var value = response?.Value as ListResponse<Flight>;
+
+            _dbContext.Dispose();
+
+            // Assert
+            Assert.True(value?.TotalRecord == 1);
         }
 
         [Fact]
         public void TestCreateOrderAsync()
         {
-            // Arrange
-            var dbContext = FlyplanDbContextMocker.GetFlyplanContext(nameof(TestCreateOrderAsync));
-            //auto mapper configuration
-            var mockMapper = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new MapperProfile());
-            });
-            var mapper = mockMapper.CreateMapper();
-            var controller = new FlyPlanController(null, dbContext, mapper);
-
-            // Act
+            var controller = InitialFlyPlanController(nameof(TestCreateOrderAsync));
             var response = controller.CreateOrderAsync(new OrderRequest
             {
                 ConfirmationId = Guid.Parse("198EAEA2-9578-CE16-4CF6-000BBBD22AF3"),
@@ -67,60 +67,49 @@ namespace FlyPlan.Api.UnitTests
             }).Result as ObjectResult;
 
 
-            var value = response.Value as SingleResponse<ExpandoObject>;
+            var value = response?.Value as SingleResponse<ExpandoObject>;
 
-            dbContext.Dispose();
+            _dbContext.Dispose();
 
             // Assert
-            Assert.False(value.DidError);
+            Assert.False(value?.DidError);
         }
 
         [Fact]
         public void TestGetOrderDetail()
         {
-            // Arrange
-            var dbContext = FlyplanDbContextMocker.GetFlyplanContext(nameof(TestGetOrderDetail));
-            //auto mapper configuration
-            var mockMapper = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new MapperProfile());
-            });
-            var mapper = mockMapper.CreateMapper();
-            var controller = new FlyPlanController(null, dbContext, mapper);
-
-            // Act
+            var controller = InitialFlyPlanController(nameof(TestGetOrderDetail));
             var response = controller.GetOrderDetail("CDJSDI") as ObjectResult;
 
-            var value = response.Value as SingleResponse<OrderViewModel>;
+            var value = response?.Value as SingleResponse<OrderViewModel>;
 
-            dbContext.Dispose();
+            _dbContext.Dispose();
 
             // Assert
-            Assert.False(value.DidError);
+            Assert.False(value?.DidError);
         }
 
         [Fact]
         public void GetAllOrders()
         {
-            // Arrange
-            var dbContext = FlyplanDbContextMocker.GetFlyplanContext(nameof(GetAllOrders));
-            //auto mapper configuration
-            var mockMapper = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new MapperProfile());
-            });
-            var mapper = mockMapper.CreateMapper();
-            var controller = new FlyPlanController(null, dbContext, mapper);
-
-            // Act
+            var controller = InitialFlyPlanController(nameof(GetAllOrders));
             var response = controller.GetAllOrders() as ObjectResult;
 
-            var value = response.Value as ListResponse<OrderViewModel>;
+            var value = response?.Value as ListResponse<OrderViewModel>;
 
-            dbContext.Dispose();
+            _dbContext.Dispose();
 
             // Assert
-            Assert.False(value.DidError);
+            Assert.False(value?.DidError);
+        }
+
+        private FlyPlanController InitialFlyPlanController(string action)
+        {
+            _dbContext = FlyplanDbContextMocker.GetFlyplanContext(action);
+            var mockMapper = new MapperConfiguration(cfg => { cfg.AddProfile(new MapperProfile()); });
+            var mapper = mockMapper.CreateMapper();
+            var controller = new FlyPlanController(null, _dbContext, mapper);
+            return controller;
         }
     }
 }

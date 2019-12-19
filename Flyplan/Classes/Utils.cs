@@ -19,7 +19,7 @@ namespace FlyPlan.Api.Classes
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        internal static DateTime? ConvertToDateTime(string value)
+        internal static DateTime ToDateTime(this string value)
         {
             try
             {
@@ -29,8 +29,21 @@ namespace FlyPlan.Api.Classes
             }
             catch (Exception ex)
             {
-                return null;
+                return DateTime.MinValue;
             }
+        }
+
+        internal static DateTime ChangeTime(this DateTime dateTime, int hours, int minutes, int seconds, int milliseconds)
+        {
+            return new DateTime(
+                dateTime.Year,
+                dateTime.Month,
+                dateTime.Day,
+                hours,
+                minutes,
+                seconds,
+                milliseconds,
+                dateTime.Kind);
         }
     }
 }

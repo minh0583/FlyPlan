@@ -5,7 +5,9 @@ VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyPlan.Api", "Flyplan\FlyPlan.Api.csproj", "{B66FC078-329C-4899-892F-C8493302DD08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyPlan.Data", "FlyPlan.Data\FlyPlan.Data.csproj", "{39B5D5BC-655F-4CF5-893D-6CC3B64C61EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyPlan.Data", "FlyPlan.Data\FlyPlan.Data.csproj", "{39B5D5BC-655F-4CF5-893D-6CC3B64C61EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyPlan.Api.UnitTests", "FlyPlan.Api.UnitTests\FlyPlan.Api.UnitTests.csproj", "{ABCDB483-ABD5-434D-9355-83BEC454BA09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{39B5D5BC-655F-4CF5-893D-6CC3B64C61EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39B5D5BC-655F-4CF5-893D-6CC3B64C61EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39B5D5BC-655F-4CF5-893D-6CC3B64C61EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABCDB483-ABD5-434D-9355-83BEC454BA09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABCDB483-ABD5-434D-9355-83BEC454BA09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABCDB483-ABD5-434D-9355-83BEC454BA09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABCDB483-ABD5-434D-9355-83BEC454BA09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,8 @@ namespace FlyPlan.Data.Models
 {
     public partial class FlyplanContext : DbContext
     {
+        private static string IN_MEMORY = "Microsoft.EntityFrameworkCore.InMemory";
+
         public FlyplanContext()
         {
         }
@@ -81,32 +83,6 @@ namespace FlyPlan.Data.Models
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<Order>(entity =>
-            {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.Code).HasMaxLength(250);
-
-                entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-
-                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.Confirmation)
-                    .WithMany(p => p.Order)
-                    .HasForeignKey(d => d.ConfirmationId)
-                    .HasConstraintName("FK_Order_ConfirmationInfo");
-
-                entity.HasOne(d => d.Flight)
-                    .WithMany(p => p.Order)
-                    .HasForeignKey(d => d.FlightId)
-                    .HasConstraintName("FK_Order_Flight");
-
-                entity.HasOne(d => d.Payment)
-                    .WithMany(p => p.Order)
-                    .HasForeignKey(d => d.PaymentId)
-                    .HasConstraintName("FK_Order_Payment");
-            });
-
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -167,22 +143,72 @@ namespace FlyPlan.Data.Models
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<TravellerOrder>(entity =>
+            if (Database.ProviderName == IN_MEMORY)
             {
-                entity.HasKey(e => new { e.TravellerId, e.OrderId });
+                modelBuilder.Entity<Order>(entity =>
+                {
+                    entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.TravellerOrder)
-                    .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_TravellerOrder_Order");
+                    entity.Property(e => e.Code).HasMaxLength(250);
 
-                entity.HasOne(d => d.Traveller)
-                    .WithMany(p => p.TravellerOrder)
-                    .HasForeignKey(d => d.TravellerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_TravellerOrder_Traveller");
-            });
+                    entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                    entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+                });
+
+                modelBuilder.Entity<TravellerOrder>(entity =>
+                {
+                    entity.HasKey(e => new { e.TravellerId, e.OrderId });
+                });
+            }
+            else
+            {
+                modelBuilder.Entity<Order>(entity =>
+                {
+                    entity.Property(e => e.Id).ValueGeneratedNever();
+
+                    entity.Property(e => e.Code).HasMaxLength(250);
+
+                    entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+                    entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+                    entity.HasOne(d => d.Confirmation)
+                        .WithMany(p => p.Order)
+                        .HasForeignKey(d => d.ConfirmationId)
+                        .HasConstraintName("FK_Order_ConfirmationInfo");
+
+                    entity.HasOne(d => d.Flight)
+                        .WithMany(p => p.Order)
+                        .HasForeignKey(d => d.FlightId)
+                        .HasConstraintName("FK_Order_Flight");
+
+                    entity.HasOne(d => d.Payment)
+                        .WithMany(p => p.Order)
+                        .HasForeignKey(d => d.PaymentId)
+                        .HasConstraintName("FK_Order_Payment");
+                });
+
+                modelBuilder.Entity<TravellerOrder>(entity =>
+                {
+                    entity.HasKey(e => new { e.TravellerId, e.OrderId });
+
+                    if (Database.ProviderName != IN_MEMORY)
+                    {
+                        entity.HasOne(d => d.Order)
+                            .WithMany(p => p.TravellerOrder)
+                            .HasForeignKey(d => d.OrderId)
+                            .OnDelete(DeleteBehavior.ClientSetNull)
+                            .HasConstraintName("FK_TravellerOrder_Order");
+
+                        entity.HasOne(d => d.Traveller)
+                            .WithMany(p => p.TravellerOrder)
+                            .HasForeignKey(d => d.TravellerId)
+                            .OnDelete(DeleteBehavior.ClientSetNull)
+                            .HasConstraintName("FK_TravellerOrder_Traveller");
+                    }
+                });
+            }
         }
     }
 }

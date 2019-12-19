@@ -10,7 +10,7 @@ namespace FlyPlan.Api.Classes
     {
         private static Random random = new Random();
 
-        private static string DATE_TIME_FORMAT = "ddd MMM dd yyyy HH:mm:ss 'GMT'K";
+        private static string DATE_TIME_FORMAT = "ddd MMM dd yyyy HH:mm:ss";
 
         internal static string GenerateReservationCode(int length)
         {
@@ -23,9 +23,9 @@ namespace FlyPlan.Api.Classes
         {
             try
             {
-                var dateTime = DateTime.ParseExact(value, DATE_TIME_FORMAT, CultureInfo.InvariantCulture);
+                var dateTime = DateTime.ParseExact(value.Replace(" GMT+0000", String.Empty), DATE_TIME_FORMAT, CultureInfo.CurrentCulture);
 
-                return dateTime;
+                return dateTime.Date;
             }
             catch (Exception ex)
             {

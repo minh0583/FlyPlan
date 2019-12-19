@@ -81,7 +81,7 @@ namespace FlyPlan.Api.UnitTests
             var controller = InitialFlyPlanController(nameof(TestGetOrderDetail));
             var response = controller.GetOrderDetail("CDJSDI") as ObjectResult;
 
-            var value = response?.Value as SingleResponse<OrderViewModel>;
+            var value = response?.Value as SingleResponse<OrderViewModelResponse>;
 
             _dbContext.Dispose();
 
@@ -95,7 +95,7 @@ namespace FlyPlan.Api.UnitTests
             var controller = InitialFlyPlanController(nameof(GetAllOrders));
             var response = controller.GetAllOrders() as ObjectResult;
 
-            var value = response?.Value as ListResponse<OrderViewModel>;
+            var value = response?.Value as ListResponse<OrderViewModelResponse>;
 
             _dbContext.Dispose();
 

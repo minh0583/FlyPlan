@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlyPlan.Api.Models.Response
+namespace FlyPlan.Api.Models.Request
 {
     public class PaymentViewModel
     {
-        public Guid Id { get; set; }
         public string CreditCardType { get; set; }
         public string CardNumber { get; set; }
         public string NameOnTheCard { get; set; }

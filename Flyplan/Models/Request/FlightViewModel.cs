@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlyPlan.Api.Models.Response
+namespace FlyPlan.Api.Models.Request
 {
     public class FlightViewModel
     {
-        public Guid Id { get; set; }
         public int RoundTrip { get; set; }
         public string Depart { get; set; }
         public string DepartTime { get; set; }

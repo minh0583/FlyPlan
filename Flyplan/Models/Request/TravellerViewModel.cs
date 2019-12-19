@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlyPlan.Api.Models.Response
+namespace FlyPlan.Api.Models.Request
 {
     public class TravellerViewModel
     {
-        public Guid Id { get; set; }
-        public Guid OrderId { get; set; }
         public string PersonType { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

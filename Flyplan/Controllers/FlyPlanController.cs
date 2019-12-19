@@ -53,8 +53,8 @@ namespace FlyPlan.Api.Controllers
                     var flightDetail = DbContext.Flight.Where(p =>
                         (string.IsNullOrEmpty(searchFlightCriteria.From) || p.Depart == searchFlightCriteria.From) &&
                         (string.IsNullOrEmpty(searchFlightCriteria.To) || p.Return == searchFlightCriteria.To) &&
-                        (searchFlightCriteria.DepartDate == null || p.DepartTime.ToDateTime() >= searchFlightCriteria.DepartDate.Value.ChangeTime(0,0,0,0)) &&
-                        (searchFlightCriteria.ReturnDate == null || p.ReturnTime.ToDateTime() <= searchFlightCriteria.ReturnDate.Value.ChangeTime(23,59,59,0)) &&
+                        (searchFlightCriteria.DepartDate == null || p.DepartTime.ToDateTime() == searchFlightCriteria.DepartDate.Value.Date) &&
+                        (searchFlightCriteria.ReturnDate == null || p.ReturnTime.ToDateTime() == searchFlightCriteria.ReturnDate.Value.Date) &&
                         //searchFlightCriteria.Adults 
                         //searchFlightCriteria.Children 
                         //searchFlightCriteria.Infants
@@ -63,8 +63,7 @@ namespace FlyPlan.Api.Controllers
                         (searchFlightCriteria.PriceFrom == null || p.TotalMoney >= searchFlightCriteria.PriceFrom) &&
                         (searchFlightCriteria.PriceTo == null || p.TotalMoney <= searchFlightCriteria.PriceTo) &&
                         (string.IsNullOrEmpty(searchFlightCriteria.DepartTime) || p.DepartTime == searchFlightCriteria.DepartTime) &&
-                        (string.IsNullOrEmpty(searchFlightCriteria.Airlines) || p.DepartAirlineName == searchFlightCriteria.Airlines) &&
-                        (string.IsNullOrEmpty(searchFlightCriteria.Airlines) || p.ReturnAirlineName == searchFlightCriteria.Airlines)
+                        (string.IsNullOrEmpty(searchFlightCriteria.Airlines) || p.DepartAirlineName == searchFlightCriteria.Airlines || p.ReturnAirlineName == searchFlightCriteria.Airlines)
                     ).ToList();
 
                     response.Model = flightDetail;
@@ -85,7 +84,111 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
+
         [HttpPost("order")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> CreateFulfillOrderAsync([FromBody] FulfillOrderRequest fulfillOrderRequest)
+        {
+            Logger?.LogDebug("'{0}' has been invoked", nameof(CreateFulfillOrderAsync));
+
+            var response = new SingleResponse<ExpandoObject>();
+
+            try
+            {
+                if (DbContext.Flight.FirstOrDefault(p => p.Id == fulfillOrderRequest.FlightId) == null)
+                {
+                    response.ErrorMessage = $"Flight with {fulfillOrderRequest.FlightId} is not found";
+                    return response.ToHttpResponse();
+                }
+
+                var confimrationInfo = Mapper.Map<ConfirmationInfo>(fulfillOrderRequest.ConfirmationInfoViewModel);
+                var payment = Mapper.Map<Payment>(fulfillOrderRequest.PaymentViewModel);
+                var travellers = Mapper.Map<List<Traveller>>(fulfillOrderRequest.TravellerViewModels);
+                var order = new Order
+                {
+                    Id = Guid.NewGuid(),
+                    FlightId = fulfillOrderRequest.FlightId,
+                    Code = Utils.GenerateReservationCode(6),
+                    Payment = payment,
+                    Confirmation = confimrationInfo
+                };
+
+                DbContext.Order.Add(order);
+                DbContext.Traveller.AddRange(travellers);
+
+                foreach (var traveller in travellers)
+                {
+                    DbContext.TravellerOrder.Add(new TravellerOrder
+                    {
+                        OrderId = order.Id,
+                        TravellerId = traveller.Id
+                    });
+                }
+
+                await DbContext.SaveChangesAsync();
+
+                dynamic returnModel = new ExpandoObject();
+                returnModel.OrderId = order.Id;
+                returnModel.Code = order.Code;
+
+                response.Model = returnModel;
+            }
+            catch (Exception ex)
+            {
+                response.DidError = true;
+                response.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                Logger?.LogCritical("There was an error on '{0}' invocation: {1}", nameof(CreateFulfillOrderAsync), ex);
+            }
+
+            return response.ToHttpResponse();
+        }
+
+        [HttpGet("order/{code}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetOrderDetail(string code)
+        {
+            Logger?.LogDebug("'{0}' has been invoked", nameof(GetOrderDetail));
+
+            var response = new SingleResponse<OrderViewModelResponse>();
+
+            try
+            {
+                var order = DbContext.Order
+                    .Include(p => p.Confirmation)
+                    .Include(p => p.Flight)
+                    .Include(p => p.Payment)
+                    .FirstOrDefault(p => p.Code == code);
+
+                if (order != null)
+                {
+                    var travelOrders = DbContext.TravellerOrder
+                        .Include(p => p.Traveller)
+                        .Where(p => p.OrderId == order.Id)
+                        .Select(p => p.Traveller);
+
+                    var orderViewModel = Mapper.Map<OrderViewModelResponse>(order);
+                    orderViewModel.Travellers = Mapper.Map<List<TravellerViewModelResponse>>(travelOrders);
+
+                    response.Model = orderViewModel;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.DidError = true;
+                response.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+
+                Logger?.LogCritical("There was an error on '{0}' invocation: {1}", nameof(GetFlights), ex);
+            }
+
+            return response.ToHttpResponse();
+        }
+
+        [HttpPost("simplifyOrder")]
         [ProducesResponseType(200)]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
@@ -155,48 +258,6 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
-        [HttpGet("order/{code}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public IActionResult GetOrderDetail(string code)
-        {
-            Logger?.LogDebug("'{0}' has been invoked", nameof(GetOrderDetail));
-
-            var response = new SingleResponse<OrderViewModel>();
-
-            try
-            {
-                var order = DbContext.Order
-                    .Include(p => p.Confirmation)
-                    .Include(p => p.Flight)
-                    .Include(p => p.Payment)
-                    .FirstOrDefault(p => p.Code == code);
-
-                if (order != null)
-                {
-                    var travelOrders = DbContext.TravellerOrder
-                        .Include(p => p.Traveller)
-                        .Where(p => p.OrderId == order.Id)
-                        .Select(p => p.Traveller);
-
-                    var orderViewModel = Mapper.Map<OrderViewModel>(order);
-                    orderViewModel.Travellers = Mapper.Map<List<TravellerViewModel>>(travelOrders);
-
-                    response.Model = orderViewModel;
-                }
-            }
-            catch (Exception ex)
-            {
-                response.DidError = true;
-                response.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-
-                Logger?.LogCritical("There was an error on '{0}' invocation: {1}", nameof(GetFlights), ex);
-            }
-
-            return response.ToHttpResponse();
-        }
-
         [HttpGet("order")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
@@ -205,7 +266,7 @@ namespace FlyPlan.Api.Controllers
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetAllOrders));
 
-            var response = new ListResponse<OrderViewModel>();
+            var response = new ListResponse<OrderViewModelResponse>();
 
             try
             {
@@ -222,13 +283,13 @@ namespace FlyPlan.Api.Controllers
                     .ToList();
 
 
-                var orderViewModels = Mapper.Map<List<OrderViewModel>>(orders);
+                var orderViewModels = Mapper.Map<List<OrderViewModelResponse>>(orders);
 
                 foreach (var orderViewModel in orderViewModels)
                 {
                     var travellers = travelOrders.Where(p => p.OrderId == orderViewModel.Id).Select(p => p.Traveller);
 
-                    orderViewModel.Travellers = Mapper.Map<List<TravellerViewModel>>(travellers);
+                    orderViewModel.Travellers = Mapper.Map<List<TravellerViewModelResponse>>(travellers);
                 }
 
                 response.Model = orderViewModels;

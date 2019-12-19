@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using FlyPlan.Data.Models;
+﻿using FlyPlan.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlyPlan.Api.UnitTests

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyPlan.Api", "Flyplan\FlyP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyPlan.Data", "FlyPlan.Data\FlyPlan.Data.csproj", "{39B5D5BC-655F-4CF5-893D-6CC3B64C61EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlyPlan.Api.UnitTests", "FlyPlan.Api.UnitTests\FlyPlan.Api.UnitTests.csproj", "{ABCDB483-ABD5-434D-9355-83BEC454BA09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyPlan.Api.UnitTests", "FlyPlan.Api.UnitTests\FlyPlan.Api.UnitTests.csproj", "{ABCDB483-ABD5-434D-9355-83BEC454BA09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

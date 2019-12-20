@@ -53,7 +53,7 @@ namespace FlyPlan.Api.UnitTests
         public void TestCreateOrderAsync()
         {
             var controller = InitialFlyPlanController(nameof(TestCreateOrderAsync));
-            var response = controller.CreateOrderAsync(new OrderRequest
+            var response = controller.CreateOrderAsync(new BookingRequest
             {
                 ConfirmationId = Guid.Parse("198EAEA2-9578-CE16-4CF6-000BBBD22AF3"),
                 FlightId = Guid.Parse("86FCB407-4EDF-C220-4B12-0002FD2BB55E"),
@@ -81,7 +81,7 @@ namespace FlyPlan.Api.UnitTests
             var controller = InitialFlyPlanController(nameof(TestGetOrderDetail));
             var response = controller.GetOrderDetail("CDJSDI") as ObjectResult;
 
-            var value = response?.Value as SingleResponse<OrderViewModelResponse>;
+            var value = response?.Value as SingleResponse<BookingViewModelResponse>;
 
             _dbContext.Dispose();
 
@@ -95,7 +95,7 @@ namespace FlyPlan.Api.UnitTests
             var controller = InitialFlyPlanController(nameof(GetAllOrders));
             var response = controller.GetAllOrders() as ObjectResult;
 
-            var value = response?.Value as ListResponse<OrderViewModelResponse>;
+            var value = response?.Value as ListResponse<BookingViewModelResponse>;
 
             _dbContext.Dispose();
 

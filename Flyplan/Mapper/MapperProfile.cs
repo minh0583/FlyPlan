@@ -10,10 +10,10 @@ namespace FlyPlan.Api.Mapper
     {
         public MapperProfile()
         {
-            CreateMap<OrderRequest, Order>()
+            CreateMap<BookingRequest, Order>()
                 .ForMember(p => p.CreatedDate, opt => opt.MapFrom(p => DateTime.Now));
 
-            CreateMap<Order, OrderViewModelResponse>()
+            CreateMap<Order, BookingViewModelResponse>()
                 .ForMember(p => p.PaymentViewModel, opt => opt.MapFrom(p => p.Payment))
                 .ForMember(p => p.ConfirmationInfoViewModel, opt => opt.MapFrom(p => p.Confirmation))
                 .ForMember(p => p.FlightViewModel, opt => opt.MapFrom(p => p.Flight));

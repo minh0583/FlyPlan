@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlyPlan.Api.Models.Request
 {
-    public class OrderRequest
+    public class BookingRequest
     {
         public Guid FlightId { get; set; }
         public List<Guid> TravellerIds { get; set; }

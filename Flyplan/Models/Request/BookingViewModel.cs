@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FlyPlan.Api.Models.Request
 {
-    public class OrderViewModel
+    public class BookingViewModel
     {
         public  string Code { get; set; }
         public FlightViewModel FlightViewModel { get; set; }

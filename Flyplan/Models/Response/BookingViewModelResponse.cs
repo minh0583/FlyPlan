@@ -4,7 +4,7 @@ using FlyPlan.Api.Models.Request;
 
 namespace FlyPlan.Api.Models.Response
 {
-    public class OrderViewModelResponse
+    public class BookingViewModelResponse
     {
         public Guid Id { get; set; }
         public string Code { get; set; }

@@ -4,7 +4,7 @@ using FlyPlan.Api.Models.Response;
 
 namespace FlyPlan.Api.Models.Request
 {
-    public class FulfillOrderRequest
+    public class FulfillBookingRequest
     {
         public Guid FlightId { get; set; }
         public List<TravellerViewModel> TravellerViewModels { get; set; }

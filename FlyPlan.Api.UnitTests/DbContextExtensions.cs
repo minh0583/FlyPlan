@@ -8,7 +8,7 @@ namespace FlyPlan.Api.UnitTests
         public static void Seed(this FlyplanContext dbContext)
         {
             // Add entities for DbContext instance
-            var flight = new Flight
+            var flight1 = new Flight
             {
                 Id = Guid.Parse("86FCB407-4EDF-C220-4B12-0002FD2BB55E"),
                 RoundTrip = 0,
@@ -30,7 +30,28 @@ namespace FlyPlan.Api.UnitTests
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now
             };
-            dbContext.Flight.Add(flight);
+
+            var flight2 = new Flight
+            {
+                Id = Guid.Parse("9E5072D8-8420-C137-297B-0003C457D86A"),
+                RoundTrip = 0,
+                Depart = "Mexico City",
+                DepartTime = "Mon Jan 13 2020 13:05:58 GMT+0000",
+                DepartAirport = "New York City NY, USA",
+                Return = "Tokyo",
+                ReturnTime = "Thu Jan 16 2020 13:34:45 GMT+0000",
+                TotalTime = "a day",
+                ClassType = "Business Class",
+                DepartAirlinePicture = "http://placehold.it/30x30",
+                DepartAirlineName = "Vietnam Airlines",
+                DepartAirlinePlane = "CL-600-2D24",
+                TotalMoney = 423,
+                CreatedDate = DateTime.Now,
+                UpdatedDate = DateTime.Now
+            };
+
+            dbContext.Flight.Add(flight1);
+            dbContext.Flight.Add(flight2);
 
             var confirmation = new ConfirmationInfo
             {
@@ -123,7 +144,7 @@ namespace FlyPlan.Api.UnitTests
                 Code = "CDJSDI",
                 Payment = payment,
                 Confirmation = confirmation,
-                Flight = flight,
+                Flight = flight1,
                 CreatedDate = DateTime.Now,
                 UpdatedDate = DateTime.Now
             });

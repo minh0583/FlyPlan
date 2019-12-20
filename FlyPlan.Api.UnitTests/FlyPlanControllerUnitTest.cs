@@ -135,7 +135,8 @@ namespace FlyPlan.Api.UnitTests
             var response = controller.GetFlights(new SearchFlight
             {
                 DepartDate = Convert.ToDateTime("01/14/2020"),
-                ReturnDate = Convert.ToDateTime("01/15/2020")
+                ReturnDate = Convert.ToDateTime("01/15/2020"),
+                Airlines = new List<string> { "Singapore Airlines", "Vietnam Airlines" }
 
             }) as ObjectResult;
             var value = response?.Value as ListResponse<Flight>;

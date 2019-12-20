@@ -116,7 +116,7 @@ namespace FlyPlan.Api.Controllers
                         (searchFlightCriteria.PriceFrom == null || p.TotalMoney >= searchFlightCriteria.PriceFrom) &&
                         (searchFlightCriteria.PriceTo == null || p.TotalMoney <= searchFlightCriteria.PriceTo) &&
                         (string.IsNullOrEmpty(searchFlightCriteria.DepartTime) || p.DepartTime == searchFlightCriteria.DepartTime) &&
-                        (string.IsNullOrEmpty(searchFlightCriteria.Airlines) || p.DepartAirlineName == searchFlightCriteria.Airlines || p.ReturnAirlineName == searchFlightCriteria.Airlines)
+                        (searchFlightCriteria.Airlines == null || searchFlightCriteria.Airlines.Count == 0 || searchFlightCriteria.Airlines.Contains(p.DepartAirlineName) || searchFlightCriteria.Airlines.Contains(p.ReturnAirlineName))
                     ).ToList();
 
                     response.Model = flightDetail;

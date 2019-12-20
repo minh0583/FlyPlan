@@ -104,6 +104,8 @@ namespace FlyPlan.Api.Data
 
             if (response.DidError)
                 status = HttpStatusCode.InternalServerError;
+            else if (!string.IsNullOrEmpty(response.ErrorMessage))
+                status = HttpStatusCode.BadRequest;
             else if (response.Model == null)
                 status = HttpStatusCode.NotFound;
 
@@ -119,6 +121,8 @@ namespace FlyPlan.Api.Data
 
             if (response.DidError)
                 status = HttpStatusCode.InternalServerError;
+            else if (!string.IsNullOrEmpty(response.ErrorMessage))
+                status = HttpStatusCode.BadRequest;
             else if (response.Model == null)
                 status = HttpStatusCode.NoContent;
 

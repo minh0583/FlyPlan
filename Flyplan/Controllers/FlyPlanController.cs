@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using FlyPlan.Api.Classes;
@@ -30,6 +32,33 @@ namespace FlyPlan.Api.Controllers
             Logger = logger;
             DbContext = dbContext;
             Mapper = mapper;
+        }
+
+        [HttpGet("flight")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public IActionResult GetAllFlights()
+        {
+            Logger?.LogDebug("'{0}' has been invoked", nameof(GetAllFlights));
+
+            var response = new ListResponse<Flight>();
+
+            try
+            {
+                var flightDetails = DbContext.Flight.ToList();
+
+                response.Model = flightDetails;
+            }
+            catch (Exception ex)
+            {
+                response.DidError = true;
+                response.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+
+                Logger?.LogCritical("There was an error on '{0}' invocation: {1}", nameof(GetFlights), ex);
+            }
+
+            return response.ToHttpResponse();
         }
 
         [HttpGet("flight/{Id}")]
@@ -122,10 +151,11 @@ namespace FlyPlan.Api.Controllers
 
             try
             {
-                if (DbContext.Flight.FirstOrDefault(p => p.Id == fulfillOrderRequest.FlightId) == null)
+                var invalidData = ValidationData(fulfillOrderRequest);
+
+                if (invalidData != null)
                 {
-                    response.ErrorMessage = $"Flight with {fulfillOrderRequest.FlightId} is not found";
-                    return response.ToHttpResponse();
+                    return invalidData;
                 }
 
                 var confimrationInfo = Mapper.Map<ConfirmationInfo>(fulfillOrderRequest.ConfirmationInfoViewModel);
@@ -170,6 +200,79 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
+        List<string> ignoreProperties = new List<string> { "TravelInsurance", "CheckedBaggae" };
+
+        private IActionResult ValidationData(FulfillBookingRequest fulfillOrderRequest)
+        {
+            var errorMessages = new StringBuilder();
+            var response = new SingleResponse<ExpandoObject>();
+
+            if (DbContext.Flight.FirstOrDefault(p => p.Id == fulfillOrderRequest.FlightId) == null)
+            {
+                errorMessages.AppendLine($"Flight with {fulfillOrderRequest.FlightId} is not found.");
+            }
+
+            if (fulfillOrderRequest.ConfirmationInfoViewModel == null)
+            {
+                errorMessages.AppendLine("Confirmation is missing.");
+            }
+            else
+            {
+                foreach (var property in fulfillOrderRequest.ConfirmationInfoViewModel.GetProperties())
+                {
+                    errorMessages.AppendLine($"Confirmation.{property.Name.ToUpper()} is required.");
+                }
+            }
+
+            if (fulfillOrderRequest.PaymentViewModel == null)
+            {
+                errorMessages.AppendLine("Payment is missing.");
+            }
+            else
+            {
+                foreach (var property in fulfillOrderRequest.PaymentViewModel.GetProperties())
+                {
+                    errorMessages.AppendLine($"Payment.{property.Name.ToUpper()} is required.");
+                }
+            }
+
+            if (fulfillOrderRequest.TravellerViewModels == null || fulfillOrderRequest.TravellerViewModels.Count == 0)
+            {
+                errorMessages.AppendLine("Traveller is missing.");
+            }
+            else
+            {
+                var travellerErrors = new List<string>();
+                foreach (var travellerViewModel in fulfillOrderRequest.TravellerViewModels)
+                {
+                    foreach (var property in travellerViewModel.GetProperties())
+                    {
+                        if (ignoreProperties.Contains(property.Name))
+                            continue;
+
+                        travellerErrors.Add($"Traveller.{property.Name.ToUpper()} is required.");
+                    }
+                }
+
+                if (travellerErrors.Count > 0)
+                {
+                    foreach (var travellerError in travellerErrors.Distinct())
+                    {
+                        errorMessages.AppendLine(travellerError);
+                    }
+                }
+            }
+
+            if (errorMessages.Length == 0)
+            {
+                return null;
+            }
+
+            response.ErrorMessage = errorMessages.ToString();
+
+            return response.ToHttpResponse();
+        }
+
         [HttpGet("booking/{code}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
@@ -207,76 +310,6 @@ namespace FlyPlan.Api.Controllers
                 response.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
 
                 Logger?.LogCritical("There was an error on '{0}' invocation: {1}", nameof(GetFlights), ex);
-            }
-
-            return response.ToHttpResponse();
-        }
-
-        [HttpPost("simplifyBooking")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateOrderAsync([FromBody] BookingRequest orderRequest)
-        {
-            Logger?.LogDebug("'{0}' has been invoked", nameof(CreateOrderAsync));
-
-            var response = new SingleResponse<ExpandoObject>();
-
-            try
-            {
-                if (DbContext.Flight.FirstOrDefault(p => p.Id == orderRequest.FlightId) == null)
-                {
-                    response.ErrorMessage = $"Flight with {orderRequest.FlightId} is not found";
-                    return response.ToHttpResponse();
-                }
-
-                if (DbContext.Payment.FirstOrDefault(p => p.Id == orderRequest.PaymentId) == null)
-                {
-                    response.ErrorMessage = $"Payment with {orderRequest.PaymentId} is not found";
-                    return response.ToHttpResponse();
-                }
-
-                if (DbContext.ConfirmationInfo.FirstOrDefault(p => p.Id == orderRequest.ConfirmationId) == null)
-                {
-                    response.ErrorMessage = $"Confirmation with {orderRequest.ConfirmationId} is not found";
-                    return response.ToHttpResponse();
-                }
-
-                if (DbContext.Traveller.Count(p => orderRequest.TravellerIds.Contains(p.Id)) != orderRequest.TravellerIds.Count)
-                {
-                    response.ErrorMessage = "Travellers are not found";
-                    return response.ToHttpResponse();
-                }
-
-                var order = Mapper.Map<Order>(orderRequest);
-                order.Code = Utils.GenerateReservationCode(6);
-                order.Id = Guid.NewGuid();
-
-                DbContext.Order.Add(order);
-
-                foreach (var travellerId in orderRequest.TravellerIds)
-                {
-                    DbContext.TravellerOrder.Add(new TravellerOrder
-                    {
-                        OrderId = order.Id,
-                        TravellerId = travellerId
-                    });
-                }
-
-                await DbContext.SaveChangesAsync();
-
-                dynamic returnModel = new ExpandoObject();
-                returnModel.OrderId = order.Id;
-                returnModel.Code = order.Code;
-
-                response.Model = returnModel;
-            }
-            catch (Exception ex)
-            {
-                response.DidError = true;
-                response.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                Logger?.LogCritical("There was an error on '{0}' invocation: {1}", nameof(CreateOrderAsync), ex);
             }
 
             return response.ToHttpResponse();

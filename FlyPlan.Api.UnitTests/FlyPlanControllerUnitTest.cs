@@ -19,6 +19,19 @@ namespace FlyPlan.Api.UnitTests
         private FlyplanContext _dbContext;
 
         [Fact]
+        public void GetFlight()
+        {
+            var controller = InitialFlyPlanController(nameof(GetFlight));
+            var response = controller.GetFlight(Guid.Parse("86FCB407-4EDF-C220-4B12-0002FD2BB55E")) as ObjectResult;
+            var value = response?.Value as SingleResponse<Flight>;
+
+            _dbContext.Dispose();
+
+            // Assert
+            Assert.False(value?.DidError);
+        }
+
+        [Fact]
         public void TestGetAllFlights()
         {
             var controller = InitialFlyPlanController(nameof(TestGetAllFlights));

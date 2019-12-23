@@ -73,7 +73,7 @@ namespace FlyPlan.Api.Controllers
         /// <remarks>
         /// Sample of flight's Id:
         ///
-        ///     86FCB407-4EDF-C220-4B12-0002FD2BB55E
+        ///     4C82AA22-3DE0-AAF8-CA37-007E7E592A89
         /// 
         /// </remarks>
         [HttpGet("flight/{Id}")]
@@ -216,7 +216,7 @@ namespace FlyPlan.Api.Controllers
         /// Sample request:
         ///
         ///      {
-        ///          "flightId" : "86FCB407-4EDF-C220-4B12-0002FD2BB55E",
+        ///          "flightId" : "4C82AA22-3DE0-AAF8-CA37-007E7E592A89",
         ///          "paymentViewModel" : {
         ///              "CreditCardType" : "VISA",
         ///              "CardNumber" : "50766",
@@ -405,7 +405,7 @@ namespace FlyPlan.Api.Controllers
         /// <remarks>
         /// Sample of reservation code(6 character):
         /// 
-        ///     ZTA5KV
+        ///     0GEWWV
         /// 
         /// </remarks>
         [HttpGet("booking/{code}")]

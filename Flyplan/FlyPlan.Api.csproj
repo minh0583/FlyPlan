@@ -9,6 +9,10 @@
     <DocumentationFile>..\Flyplan\Flyplan\Flyplan.Api.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>..\Flyplan\Flyplan\Flyplan.Api.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
@@ -23,12 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlyPlan.Data\FlyPlan.Data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Flyplan.Api.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

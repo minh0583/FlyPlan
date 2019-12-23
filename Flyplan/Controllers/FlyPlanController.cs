@@ -404,7 +404,7 @@ namespace FlyPlan.Api.Controllers
         /// <param name="code">Reservation code</param>
         /// <returns>booking detail information</returns>
         /// <remarks>
-        /// Sample of reservation code(6 character):
+        /// Sample of reservation code(6 characters):
         /// 
         ///     0GEWWV
         /// 

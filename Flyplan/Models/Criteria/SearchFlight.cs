@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using FlyPlan.Api.Classes;
 
 namespace FlyPlan.Api.Models.Criteria
 {
     public class SearchFlight
     {
+        [Required]
         public string From { get; set; }
+
+        [Required]
         public string To { get; set; }
         public DateTime? DepartDate { get; set; }
         public DateTime? ReturnDate { get; set; }

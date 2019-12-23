@@ -13,10 +13,10 @@ namespace FlyPlan.Api.UnitTests
                 Id = Guid.Parse("86FCB407-4EDF-C220-4B12-0002FD2BB55E"),
                 RoundTrip = 0,
                 Depart = "Shanghai",
-                DepartTime = "Tue Jan 14 2020 18:53:25 GMT+0000",
+                DepartTime = "Fri Dec 27 2019 17:34:05",
                 DepartAirport = "Tokyo TK, Japan",
                 Return = "Seoul",
-                ReturnTime = "Wed Jan 15 2020 11:47:04 GMT+0000",
+                ReturnTime = "Sat Dec 28 2019 17:34:05",
                 ReturnAirport = "Moscow MC, Rusia",
                 TotalTime = "a day",
                 ClassType = "Business Class",
@@ -36,10 +36,10 @@ namespace FlyPlan.Api.UnitTests
                 Id = Guid.Parse("9E5072D8-8420-C137-297B-0003C457D86A"),
                 RoundTrip = 0,
                 Depart = "Mexico City",
-                DepartTime = "Mon Jan 13 2020 13:05:58 GMT+0000",
+                DepartTime = "Mon Dec 23 2019 00:25:00",
                 DepartAirport = "New York City NY, USA",
                 Return = "Tokyo",
-                ReturnTime = "Thu Jan 16 2020 13:34:45 GMT+0000",
+                ReturnTime = "Thu Jan 16 2020 13:34:45",
                 TotalTime = "a day",
                 ClassType = "Business Class",
                 DepartAirlinePicture = "http://placehold.it/30x30",
@@ -50,8 +50,32 @@ namespace FlyPlan.Api.UnitTests
                 UpdatedDate = DateTime.Now
             };
 
+            var flight3 = new Flight
+            {
+                Id = Guid.Parse("69DAC8FE-3C2A-AB18-95FF-0028D9E555BE"),
+                RoundTrip = 1,
+                Depart = "Beijing",
+                DepartTime = "Sat Dec 21 2019 01:25:33",
+                DepartAirport = "Los Angeles LA, USA",
+                Return = "Beijing",
+                ReturnTime = "Wed Jan 15 2020 15:27:10",
+                ReturnAirport = "Singapore SG, Singapore",
+                TotalTime = "5 days",
+                ClassType = "Business Class",
+                DepartAirlinePicture = "https://www.logolynx.com/images/logolynx/99/9987227f610e705459709216ce49dce3.jpeg",
+                DepartAirlineName = "China Airlines",
+                DepartAirlinePlane = "A321-211",
+                ReturnAirlinePicture = "https://www.chatbotkorea.com/img/bot/logo/1501161171c210a09e200b3cbb3d1f33efc219f8da",
+                ReturnAirlineName = "Austrian Airlines",
+                ReturnAirlinePlane = "757-224",
+                TotalMoney = 555,
+                CreatedDate = DateTime.Now,
+                UpdatedDate = DateTime.Now
+            };
+
             dbContext.Flight.Add(flight1);
             dbContext.Flight.Add(flight2);
+            dbContext.Flight.Add(flight3);
 
             var confirmation = new ConfirmationInfo
             {

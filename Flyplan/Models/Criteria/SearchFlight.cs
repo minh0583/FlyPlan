@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FlyPlan.Api.Classes;
 
 namespace FlyPlan.Api.Models.Criteria
 {
@@ -13,7 +14,8 @@ namespace FlyPlan.Api.Models.Criteria
         public int? RoundTrip { get; set; }
         public float? PriceFrom { get; set; }
         public float? PriceTo { get; set; }
-        public string DepartTime { get; set; }
         public List<string> Airlines { get; set; }
+        public OrderByEnum OrderBy { get; set; }
+        public int? NumberOfRecord { get; set; }
     }
 }

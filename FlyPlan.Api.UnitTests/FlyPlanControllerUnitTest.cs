@@ -134,8 +134,8 @@ namespace FlyPlan.Api.UnitTests
             var controller = InitialFlyPlanController(nameof(TestGetFlightsByDateRange));
             var response = controller.GetFlights(new SearchFlight
             {
-                DepartDate = Convert.ToDateTime("01/14/2020"),
-                ReturnDate = Convert.ToDateTime("01/15/2020"),
+                DepartDate = Convert.ToDateTime("12/27/2019"),
+                ReturnDate = Convert.ToDateTime("12/28/2019"),
                 Airlines = new List<string> { "Singapore Airlines", "Vietnam Airlines" }
 
             }) as ObjectResult;
@@ -145,6 +145,43 @@ namespace FlyPlan.Api.UnitTests
 
             // Assert
             Assert.True(value?.TotalRecord == 1);
+        }
+
+        [Fact]
+        public void TestGetFlightsByAirlines()
+        {
+            var controller = InitialFlyPlanController(nameof(TestGetFlightsByAirlines));
+            var response = controller.GetFlights(new SearchFlight
+            {
+                Airlines = new List<string> { "Singapore Airlines", "Vietnam Airlines", "Austrian Airlines" }
+
+            }) as ObjectResult;
+            var value = response?.Value as ListResponse<Flight>;
+
+            _dbContext.Dispose();
+
+            // Assert
+            Assert.True(value?.TotalRecord == 3);
+        }
+
+        [Fact]
+        public void TestGetFlightsAndOrderyByDepartTime()
+        {
+            var controller = InitialFlyPlanController(nameof(TestGetFlightsAndOrderyByDepartTime));
+            var response = controller.GetFlights(new SearchFlight
+            {
+                OrderBy = OrderByEnum.DepartTime
+
+            }) as ObjectResult;
+            var value = response?.Value as ListResponse<Flight>;
+
+            _dbContext.Dispose();
+
+            // Assert
+            Assert.True(value?.TotalRecord == 3);
+            Assert.True(value?.Model.ElementAt(0).Depart == "Beijing");
+            Assert.True(value?.Model.ElementAt(1).Depart == "Mexico City");
+            Assert.True(value?.Model.ElementAt(2).Depart == "Shanghai");
         }
 
         [Fact]

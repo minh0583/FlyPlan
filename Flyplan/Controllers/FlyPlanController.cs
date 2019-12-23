@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Globalization;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +34,10 @@ namespace FlyPlan.Api.Controllers
             Mapper = mapper;
         }
 
+        /// <summary>
+        /// Get all flights
+        /// </summary>
+        /// <returns>List of all flights</returns>
         [HttpGet("flight")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
@@ -61,6 +65,17 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
+        /// <summary>
+        /// Get flight by Id as an uniqueidentifier
+        /// </summary>
+        /// <param name="Id">Id of flight</param>
+        /// <returns>the information of one flight</returns>
+        /// <remarks>
+        /// Sample of flight's Id:
+        ///
+        ///     86FCB407-4EDF-C220-4B12-0002FD2BB55E
+        /// 
+        /// </remarks>
         [HttpGet("flight/{Id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
@@ -88,6 +103,41 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
+        /// <summary>
+        /// Search flight by criteria
+        /// </summary>
+        /// <param name="searchFlightCriteria">Information of flight criteria</param>
+        /// <returns>List of flights</returns>
+        /// <remarks>
+        /// Sample request: 
+        ///     
+        ///     {
+        ///         "from": "Beijing",
+        ///         "to": "Seoul",
+        ///         "departDate": "2019-12-23",
+        ///         "returnDate": "2019-12-28",
+        ///         "classType": "Economy",
+        ///         "roundTrip": 0,
+        ///         "priceFrom": 0,
+        ///         "priceTo": 1000,
+        ///         "airlines": [
+        ///             "Austrian Airlines",
+        ///             "Air France"
+        ///         ],
+        ///         "orderBy": "TotalMoney",
+        ///         "numberOfRecord": 20
+        ///     }
+        ///
+        /// Order by value: (default is TotalMoney)
+        /// 
+        ///         TotalMoney
+        ///         DepartTime
+        ///
+        /// or search all flights
+        ///
+        ///     {
+        ///     }
+        /// </remarks>
         [HttpPost("flight")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
@@ -95,6 +145,11 @@ namespace FlyPlan.Api.Controllers
         public IActionResult GetFlights([FromBody] SearchFlight searchFlightCriteria)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetFlights));
+
+            if (!searchFlightCriteria.NumberOfRecord.HasValue)
+            {
+                searchFlightCriteria.NumberOfRecord = 20;
+            }
 
             var response = new ListResponse<Flight>();
 
@@ -109,17 +164,32 @@ namespace FlyPlan.Api.Controllers
                     var flightDetail = DbContext.Flight.Where(p =>
                         (string.IsNullOrEmpty(searchFlightCriteria.From) || p.Depart == searchFlightCriteria.From) &&
                         (string.IsNullOrEmpty(searchFlightCriteria.To) || p.Return == searchFlightCriteria.To) &&
-                        (searchFlightCriteria.DepartDate == null || p.DepartTime.ToDateTime() == searchFlightCriteria.DepartDate.Value.Date) &&
-                        (searchFlightCriteria.ReturnDate == null || p.ReturnTime.ToDateTime() == searchFlightCriteria.ReturnDate.Value.Date) &&
-                        (string.IsNullOrEmpty(searchFlightCriteria.ClassType) || p.ClassType.Contains(searchFlightCriteria.ClassType)) &&
+                        (searchFlightCriteria.DepartDate == null ||
+                         p.DepartTime.ToDateTime() == searchFlightCriteria.DepartDate.Value.Date) &&
+                        (searchFlightCriteria.ReturnDate == null ||
+                         p.ReturnTime.ToDateTime() == searchFlightCriteria.ReturnDate.Value.Date) &&
+                        (string.IsNullOrEmpty(searchFlightCriteria.ClassType) ||
+                         p.ClassType.Contains(searchFlightCriteria.ClassType)) &&
                         (searchFlightCriteria.RoundTrip == null || p.RoundTrip == searchFlightCriteria.RoundTrip) &&
                         (searchFlightCriteria.PriceFrom == null || p.TotalMoney >= searchFlightCriteria.PriceFrom) &&
                         (searchFlightCriteria.PriceTo == null || p.TotalMoney <= searchFlightCriteria.PriceTo) &&
-                        (string.IsNullOrEmpty(searchFlightCriteria.DepartTime) || p.DepartTime == searchFlightCriteria.DepartTime) &&
-                        (searchFlightCriteria.Airlines == null || searchFlightCriteria.Airlines.Count == 0 || searchFlightCriteria.Airlines.Contains(p.DepartAirlineName) || searchFlightCriteria.Airlines.Contains(p.ReturnAirlineName))
-                    ).ToList();
+                        (searchFlightCriteria.Airlines == null || searchFlightCriteria.Airlines.Count == 0 ||
+                         searchFlightCriteria.Airlines.Contains(p.DepartAirlineName) ||
+                         searchFlightCriteria.Airlines.Contains(p.ReturnAirlineName)));
 
-                    response.Model = flightDetail;
+
+                    if (searchFlightCriteria.OrderBy == OrderByEnum.TotalMoney)
+                    {
+                        flightDetail = flightDetail.OrderBy(p => p.TotalMoney);
+                    }
+
+                    if (searchFlightCriteria.OrderBy == OrderByEnum.DepartTime)
+                    {
+                        flightDetail = flightDetail.OrderBy(p => Convert.ToDateTime(p.DepartTime));
+                    }
+
+
+                    response.Model = flightDetail.Take(searchFlightCriteria.NumberOfRecord.Value).ToList();
                 }
                 else
                 {
@@ -137,7 +207,61 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
-
+        /// <summary>
+        /// Create a flight booking with fully information
+        /// </summary>
+        /// <param name="fulfillOrderRequest"></param>
+        /// <returns>Reservation code</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///      {
+        ///          "flightId" : "86FCB407-4EDF-C220-4B12-0002FD2BB55E",
+        ///          "paymentViewModel" : {
+        ///              "CreditCardType" : "VISA",
+        ///              "CardNumber" : "50766",
+        ///              "NameOnTheCard" : "Chad8",
+        ///              "ExpiryDateInMonth" : "03/01",
+        ///              "ExpiryDateInYear" : "12/05",
+        ///              "CVVCode" : "0487",
+        ///              "CountryId" : "Belarus",
+        ///              "BillingAddress" : "219 Second Avenue",
+        ///              "City" : "New Orleans",
+        ///              "ZIPCode" : "10497"
+        ///          },
+        ///          "confirmationInfoViewModel": {
+        ///              "EmailAddress" : "tgcj3@mlbn.zhsfmb.org",
+        ///              "PhoneNumber" : "691-6639473",
+        ///              "IsAcceptedRule" : true,
+        ///              "IsSendEmail" : true
+        ///          },
+        ///          "travellerViewModels": [
+        ///              {
+        ///                  "PersonType" : "Infants",
+        ///                  "FirstName" : "Lewis",
+        ///                  "LastName" : "Reed",
+        ///                  "DateOfBirth" : "1955-08-03",
+        ///                  "Gender" : 2,
+        ///                  "Nationality" : 877807523,
+        ///                  "PasportId" : "12974",
+        ///                  "PasportExpiryDateMonth" : "07/09",
+        ///                  "PasportExpiryDateYear" : "10/14",
+        ///                  "PasportNoExpiry" : false
+        ///              }, { 
+        ///                  "PersonType" : "Children",
+        ///                  "FirstName" : "Herbert",
+        ///                  "LastName" : "Pineda",
+        ///                  "DateOfBirth" : "1959-03-29",
+        ///                  "Gender" : 2,
+        ///                  "Nationality" : 1888668374,
+        ///                  "PasportId" : "10001",
+        ///                  "PasportExpiryDateMonth" : "08/09",
+        ///                  "PasportExpiryDateYear" : "04/10",
+        ///                  "PasportNoExpiry" : false
+        ///              }
+        ///          ]
+        ///     }
+        /// </remarks>
         [HttpPost("booking")]
         [ProducesResponseType(200)]
         [ProducesResponseType(201)]
@@ -273,6 +397,17 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
+        /// <summary>
+        /// Get booking by reservation code
+        /// </summary>
+        /// <param name="code">Reservation code</param>
+        /// <returns>booking detail information</returns>
+        /// <remarks>
+        /// Sample of reservation code(6 character):
+        /// 
+        ///     ZTA5KV
+        /// 
+        /// </remarks>
         [HttpGet("booking/{code}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
@@ -315,6 +450,10 @@ namespace FlyPlan.Api.Controllers
             return response.ToHttpResponse();
         }
 
+        /// <summary>
+        /// Get all booking
+        /// </summary>
+        /// <returns>List of booking detail information</returns>
         [HttpGet("booking")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]

@@ -434,7 +434,7 @@ namespace FlyPlan.Api.Controllers
                         .Select(p => p.Traveller);
 
                     var orderViewModel = Mapper.Map<BookingViewModelResponse>(order);
-                    orderViewModel.Travellers = Mapper.Map<List<TravellerViewModelResponse>>(travelOrders);
+                    orderViewModel.TravellerViewModels = Mapper.Map<List<TravellerViewModelResponse>>(travelOrders);
 
                     response.Model = orderViewModel;
                 }
@@ -485,7 +485,7 @@ namespace FlyPlan.Api.Controllers
                 {
                     var travellers = travelOrders.Where(p => p.OrderId == orderViewModel.Id).Select(p => p.Traveller);
 
-                    orderViewModel.Travellers = Mapper.Map<List<TravellerViewModelResponse>>(travellers);
+                    orderViewModel.TravellerViewModels = Mapper.Map<List<TravellerViewModelResponse>>(travellers);
                 }
 
                 response.Model = orderViewModels;

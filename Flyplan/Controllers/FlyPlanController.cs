@@ -291,7 +291,8 @@ namespace FlyPlan.Api.Controllers
                     FlightId = fulfillOrderRequest.FlightId,
                     Code = Utils.GenerateReservationCode(6),
                     Payment = payment,
-                    Confirmation = confimrationInfo
+                    Confirmation = confimrationInfo,
+                    CreatedDate = DateTime.Now
                 };
 
                 DbContext.Order.Add(order);

@@ -40,8 +40,6 @@ namespace FlyPlan.Api.Controllers
         /// <returns>List of all flights</returns>
         [HttpGet("flight")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
         public IActionResult GetAllFlights()
         {
             Logger?.LogDebug("'{0}' has been invoked.", nameof(GetAllFlights));
@@ -79,7 +77,6 @@ namespace FlyPlan.Api.Controllers
         [HttpGet("flight/{Id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
         public IActionResult GetFlight(Guid Id)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetFlight));
@@ -141,7 +138,6 @@ namespace FlyPlan.Api.Controllers
         [HttpPost("flight")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
         public IActionResult GetFlights([FromBody] SearchFlight searchFlightCriteria)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetFlights));
@@ -264,9 +260,7 @@ namespace FlyPlan.Api.Controllers
         /// </remarks>
         [HttpPost("booking")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
         public async Task<IActionResult> CreateFulfillOrderAsync([FromBody] FulfillBookingRequest fulfillOrderRequest)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(CreateFulfillOrderAsync));
@@ -412,7 +406,6 @@ namespace FlyPlan.Api.Controllers
         [HttpGet("booking/{code}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
         public IActionResult GetOrderDetail(string code)
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetOrderDetail));
@@ -457,8 +450,6 @@ namespace FlyPlan.Api.Controllers
         /// <returns>List of booking detail information</returns>
         [HttpGet("booking")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
         public IActionResult GetAllOrders()
         {
             Logger?.LogDebug("'{0}' has been invoked", nameof(GetAllOrders));

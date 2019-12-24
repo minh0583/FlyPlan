@@ -44,7 +44,7 @@ namespace FlyPlan.Api.Controllers
         [ProducesResponseType(500)]
         public IActionResult GetAllFlights()
         {
-            Logger?.LogDebug("'{0}' has been invoked", nameof(GetAllFlights));
+            Logger?.LogDebug("'{0}' has been invoked.", nameof(GetAllFlights));
 
             var response = new ListResponse<Flight>();
 

@@ -36,7 +36,7 @@ namespace FlyPlan.Api.UnitTests
                 Id = Guid.Parse("9E5072D8-8420-C137-297B-0003C457D86A"),
                 RoundTrip = 0,
                 Depart = "Mexico City",
-                DepartTime = "Mon Dec 23 2019 00:25:00",
+                DepartTime = "Fri Dec 27 2019 17:34:04",
                 DepartAirport = "New York City NY, USA",
                 Return = "Tokyo",
                 ReturnTime = "Thu Jan 16 2020 13:34:45",

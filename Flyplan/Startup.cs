@@ -46,7 +46,7 @@ namespace FlyPlan.Api
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new Info { Title = "FlyPlan API", Version = "v1" });
+                options.SwaggerDoc("v1", new Info { Title = "HaiLuaArline API", Version = "v1" });
 
                 // Get xml comments path
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -71,7 +71,7 @@ namespace FlyPlan.Api
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FlyPlan API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "HaiLuaArline API V1");
             });
 
             app.UseMvc();

@@ -425,6 +425,7 @@ namespace FlyPlan.Api.Controllers
                     var travelOrders = DbContext.TravellerOrder
                         .Include(p => p.Traveller)
                         .Where(p => p.OrderId == order.Id)
+                        .OrderBy(p => p.Traveller.FirstName)
                         .Select(p => p.Traveller);
 
                     var orderViewModel = Mapper.Map<BookingViewModelResponse>(order);

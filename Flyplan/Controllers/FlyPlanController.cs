@@ -202,55 +202,5 @@ namespace FlyPlan.Api.Controllers
 
             return response.ToHttpResponse();
         }
-
-        /// <summary>
-        /// Get all booking
-        /// </summary>
-        /// <returns>List of booking detail information</returns>
-        [HttpGet("booking")]
-        [ProducesResponseType(200)]
-        public IActionResult GetAllOrders()
-        {
-            Logger?.LogDebug("'{0}' has been invoked", nameof(GetAllOrders));
-
-            var response = new ListResponse<BookingViewModelResponse>();
-
-            try
-            {
-                var orders = DbContext.Order
-                    .Include(p => p.Confirmation)
-                    .Include(p => p.Flight)
-                    .Include(p => p.Payment)
-                    .ToList();
-
-                var travelOrders = DbContext.TravellerOrder
-                    .Include(p => p.Traveller)
-                    .Where(p => orders.Select(o => o.Id).Contains(p.OrderId))
-                    .Select(p => new { p.OrderId, p.Traveller })
-                    .ToList();
-
-
-                var orderViewModels = Mapper.Map<List<BookingViewModelResponse>>(orders);
-
-                foreach (var orderViewModel in orderViewModels)
-                {
-                    var travellers = travelOrders.Where(p => p.OrderId == orderViewModel.Id).Select(p => p.Traveller);
-
-                    orderViewModel.TravellerViewModels = Mapper.Map<List<TravellerViewModelResponse>>(travellers);
-                }
-
-                response.Model = orderViewModels;
-
-            }
-            catch (Exception ex)
-            {
-                response.DidError = true;
-                response.ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-
-                Logger?.LogCritical("There was an error on '{0}' invocation: {1}", nameof(GetFlights), ex);
-            }
-
-            return response.ToHttpResponse();
-        }
     }
 }

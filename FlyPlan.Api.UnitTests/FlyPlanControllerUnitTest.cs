@@ -184,20 +184,6 @@ namespace FlyPlan.Api.UnitTests
             Assert.True(value?.Model.ElementAt(2).Depart == "Shanghai");
         }
 
-        [Fact]
-        public void GetAllOrders()
-        {
-            var controller = InitialFlyPlanController(nameof(GetAllOrders));
-            var response = controller.GetAllOrders() as ObjectResult;
-
-            var value = response?.Value as ListResponse<BookingViewModelResponse>;
-
-            _dbContext.Dispose();
-
-            // Assert
-            Assert.False(value?.DidError);
-        }
-
         private FlyPlanController InitialFlyPlanController(string action)
         {
             _dbContext = FlyplanDbContextMocker.GetFlyplanContext(action);
